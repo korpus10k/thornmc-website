@@ -11,8 +11,11 @@ app.use(express.static(__dirname));
 
 // PostgreSQL ulanish
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  host: 'localhost',
+  port: 5432,
+  database: 'minecraft_db',
+  user: 'postgres',
+  password: 'admin',
 });
 
 pool.connect((err) => {

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THORN MC — O'zbekiston Minecraft Serveri</title>
+<link rel="icon" type="image/png" href="https://minecraft.wiki/images/Block_of_Emerald_JE4_BE3.png?d5a3c"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #2d7a3a; --green-mid: #3a9e4a; --green-light: #4ade80;
+    --green-btn: #1e7a1e; --green-btn-hover: #166016;
+    --bg: #ffffff; --bg2: #f8fdf8; --card: #ffffff;
+    --card-border: #d4edda; --text: #1a2e1a; --text-muted: #4a6741;
+    --text-nav: #2d5a27; --nav-bg: rgba(255,255,255,0.96);
+    --shadow: 0 4px 24px rgba(45,122,58,0.10);
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+
+  #preloader {
+    position: fixed; inset: 0; background: #071207; z-index: 9999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px;
+    transition: opacity 0.7s ease, visibility 0.7s ease;
+  }
+  #preloader.hidden { opacity: 0; visibility: hidden; }
+  .pre-grid { display: grid; grid-template-columns: repeat(3,44px); grid-template-rows: repeat(3,44px); gap: 5px; }
+  .pre-grid div { border-radius: 5px; animation: blockPop 1.3s ease-in-out infinite; }
+  .pre-grid div:nth-child(1){background:#4ade80;animation-delay:0s}
+  .pre-grid div:nth-child(2){background:#22c55e;animation-delay:.1s}
+  .pre-grid div:nth-child(3){background:#86efac;animation-delay:.2s}
+  .pre-grid div:nth-child(4){background:#16a34a;animation-delay:.3s}
+  .pre-grid div:nth-child(5){background:#4ade80;animation-delay:.4s}
+  .pre-grid div:nth-child(6){background:#22c55e;animation-delay:.5s}
+  .pre-grid div:nth-child(7){background:#86efac;animation-delay:.6s}
+  .pre-grid div:nth-child(8){background:#16a34a;animation-delay:.7s}
+  .pre-grid div:nth-child(9){background:#4ade80;animation-delay:.8s}
+  @keyframes blockPop { 0%,100%{transform:scale(.5);opacity:.2} 50%{transform:scale(1);opacity:1} }
+  .pre-text { font-family:'Orbitron',sans-serif; color:#4ade80; font-size:1.4rem; font-weight:900; letter-spacing:8px; animation:pulse 1.3s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    background:var(--nav-bg); backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--card-border); padding:0 2.5rem;
+    display:flex; align-items:center; justify-content:space-between; height:64px;
+    box-shadow:0 2px 12px rgba(45,122,58,.07);
+    transform:translateY(-100%); animation:slideDown .6s ease 1.6s forwards;
+  }
+  @keyframes slideDown { to{transform:translateY(0)} }
+  .logo { font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.35rem; color:var(--green); text-decoration:none; letter-spacing:3px; display:flex; align-items:center; gap:8px; }
+  .nav-links { display:flex; gap:2.5rem; list-style:none; }
+  .nav-links a { color:var(--text-nav); text-decoration:none; font-weight:700; font-size:.95rem; transition:color .2s; position:relative; }
+  .nav-links a::after { content:''; position:absolute; bottom:-2px; left:0; right:0; height:2px; background:var(--green-light); transform:scaleX(0); transition:transform .25s ease; }
+  .nav-links a:hover { color:var(--green); }
+  .nav-links a:hover::after { transform:scaleX(1); }
+  .nav-ip { background:var(--green-btn); color:#fff; font-weight:800; font-size:.9rem; padding:9px 20px; border-radius:8px; cursor:pointer; border:none; font-family:'Nunito',sans-serif; display:flex; align-items:center; gap:7px; transition:transform .15s,background .2s,box-shadow .2s; }
+  .nav-ip:hover { background:var(--green-btn-hover); transform:scale(1.06); box-shadow:0 4px 16px rgba(30,122,30,.4); }
+
+  .hero { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:80px 1.5rem 4rem; position:relative; overflow:hidden; background:linear-gradient(180deg,#e8f8e8 0%,#f0faf0 35%,#f8fdf8 70%,#fff 100%); }
+  .pixel-rain { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+  .pixel-rain span { position:absolute; border-radius:2px; opacity:0; animation:pixelFall linear infinite; }
+  @keyframes pixelFall { 0%{transform:translateY(-20px) rotate(0deg);opacity:.7} 100%{transform:translateY(110vh) rotate(200deg);opacity:0} }
+  .pixel-side { position:absolute; top:60px; bottom:0; width:220px; pointer-events:none; }
+  .pixel-side.left { left:0; }
+  .pixel-side.right { right:0; }
+  .pb { animation:pixelBreath ease-in-out infinite; }
+  @keyframes pixelBreath { 0%,100%{opacity:.45;transform:scale(1)} 50%{opacity:.85;transform:scale(1.06)} }
+  .hero-content { position:relative; z-index:1; max-width:700px; }
+  .server-logo { width:140px; height:140px; margin:0 auto 1.5rem; animation:heroFloat 4s ease-in-out infinite,heroReveal .9s ease 1.9s both; filter:drop-shadow(0 8px 32px rgba(45,122,58,.4)); cursor:pointer; transition:filter .3s; }
+  .server-logo:hover { filter:drop-shadow(0 16px 48px rgba(74,222,128,.65)); }
+  @keyframes heroFloat { 0%,100%{transform:translateY(0) rotate(0deg)} 30%{transform:translateY(-10px) rotate(1.5deg)} 70%{transform:translateY(-5px) rotate(-1deg)} }
+  @keyframes heroReveal { from{opacity:0;transform:translateY(40px) scale(.8)} to{opacity:1;transform:translateY(0) scale(1)} }
+  .hero h1 { font-family:'Orbitron',sans-serif; font-size:clamp(2.8rem,7vw,5rem); font-weight:900; line-height:1.05; letter-spacing:4px; margin-bottom:.8rem; color:var(--green); animation:textReveal .8s ease 2.1s both; text-shadow:0 0 60px rgba(74,222,128,.2); }
+  @keyframes textReveal { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+  .online-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(74,222,128,.12); border:1px solid rgba(74,222,128,.3); border-radius:50px; padding:7px 18px; margin:.8rem 0 1.2rem; font-size:.95rem; font-weight:700; color:var(--green); animation:textReveal .8s ease 2.2s both; transition:background .3s,box-shadow .3s; }
+  .online-badge:hover { background:rgba(74,222,128,.22); box-shadow:0 0 24px rgba(74,222,128,.22); }
+  .dot { width:9px; height:9px; background:#22c55e; border-radius:50%; animation:blink 1.5s ease-in-out infinite; box-shadow:0 0 8px #22c55e; }
+  @keyframes blink { 0%,100%{opacity:1;box-shadow:0 0 8px #22c55e} 50%{opacity:.3;box-shadow:0 0 2px #22c55e} }
+  .hero p { color:var(--text-muted); font-size:1.05rem; margin-bottom:1.8rem; max-width:480px; margin-left:auto; margin-right:auto; animation:textReveal .8s ease 2.3s both; }
+  .ip-box { background:#fff; border:1.5px solid var(--card-border); border-radius:12px; padding:1rem 2.5rem; margin-bottom:1.8rem; display:inline-block; box-shadow:var(--shadow); animation:textReveal .8s ease 2.4s both; transition:box-shadow .3s,transform .3s; }
+  .ip-box:hover { box-shadow:0 10px 36px rgba(45,122,58,.2); transform:translateY(-3px); }
+  .ip-label { font-size:.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:2px; margin-bottom:4px; font-weight:700; }
+  .ip-address { font-family:'Orbitron',sans-serif; font-size:1.4rem; color:var(--green); letter-spacing:2px; font-weight:700; }
+  .btn-row { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; animation:textReveal .8s ease 2.5s both; }
+
+  .btn-primary { background:var(--green-btn); color:#fff; font-weight:800; font-size:1rem; padding:13px 28px; border-radius:9px; border:none; cursor:pointer; font-family:'Nunito',sans-serif; text-decoration:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 4px 16px rgba(30,122,30,.25); transition:transform .15s,background .2s,box-shadow .2s; position:relative; overflow:hidden; }
+  .btn-primary::after { content:''; position:absolute; inset:0; background:rgba(255,255,255,.18); transform:translateX(-100%) skewX(-15deg); transition:transform .45s ease; }
+  .btn-primary:hover::after { transform:translateX(200%) skewX(-15deg); }
+  .btn-primary:hover { background:var(--green-btn-hover); transform:translateY(-3px); box-shadow:0 10px 30px rgba(30,122,30,.4); }
+  .btn-primary:active { transform:translateY(0); }
+  .btn-secondary { background:#fff; color:var(--text); font-weight:700; font-size:1rem; padding:13px 28px; border-radius:9px; border:1.5px solid #d4edda; cursor:pointer; font-family:'Nunito',sans-serif; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:border-color .2s,color .2s,transform .15s,box-shadow .2s; }
+  .btn-secondary:hover { border-color:var(--green); color:var(--green); transform:translateY(-3px); box-shadow:0 8px 24px rgba(45,122,58,.12); }
+
+  .stats { background:#fff; border-top:1px solid #e8f5e9; border-bottom:1px solid #e8f5e9; padding:1.6rem 2rem; display:flex; justify-content:center; flex-wrap:wrap; }
+  .stat-item { text-align:center; padding:.8rem 3rem; display:flex; align-items:center; gap:14px; border-right:1px solid #e8f5e9; transition:background .2s; }
+  .stat-item:last-child { border-right:none; }
+  .stat-item:hover { background:#f8fdf8; }
+  .stat-icon { font-size:1.4rem; transition:transform .3s; display:block; }
+  .stat-item:hover .stat-icon { transform:scale(1.35) rotate(-8deg); }
+  .stat-number { font-family:'Orbitron',sans-serif; font-size:1.4rem; font-weight:900; color:var(--green); line-height:1.1; }
+  .stat-label { font-size:.78rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+
+  section { padding:5rem 1.5rem; }
+  .section-title { text-align:center; font-family:'Orbitron',sans-serif; font-size:clamp(1.3rem,3vw,1.8rem); font-weight:700; margin-bottom:.4rem; letter-spacing:1px; color:var(--text); }
+  .section-sub { text-align:center; color:var(--text-muted); margin-bottom:3rem; font-size:.95rem; }
+  .container { max-width:1100px; margin:0 auto; }
+
+  .modes-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; }
+  @media(max-width:900px){.modes-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:500px){.modes-grid{grid-template-columns:1fr}}
+  .mode-card { background:var(--card); border:1.5px solid #e2f0e2; border-radius:14px; padding:1.4rem 1rem; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,.04); transition:transform .35s cubic-bezier(.34,1.56,.64,1),border-color .3s,box-shadow .3s; position:relative; overflow:hidden; }
+  .mode-card::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(74,222,128,.07),transparent); opacity:0; transition:opacity .3s; }
+  .mode-card:hover { transform:translateY(-10px) scale(1.03); border-color:var(--green-light); box-shadow:0 20px 48px rgba(45,122,58,.2); }
+  .mode-card:hover::before { opacity:1; }
+  .mode-icon { font-size:2.2rem; margin-bottom:.6rem; display:block; transition:transform .4s cubic-bezier(.34,1.56,.64,1); }
+  .mode-card:hover .mode-icon { transform:scale(1.35) rotate(-8deg); }
+  .mode-name { font-weight:800; color:var(--text); margin-bottom:.4rem; font-size:1rem; }
+  .mode-desc { color:var(--text-muted); font-size:.78rem; line-height:1.5; margin-bottom:.8rem; }
+  .mode-tag { display:inline-block; font-size:.68rem; font-weight:800; padding:3px 10px; border-radius:20px; background:rgba(74,222,128,.12); color:var(--green); text-transform:uppercase; letter-spacing:.5px; transition:background .2s; }
+  .mode-card:hover .mode-tag { background:rgba(74,222,128,.28); }
+
+  .why-bg { background:var(--bg2); }
+  .features-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1.5rem; }
+  .feature { text-align:center; padding:2rem 1rem; background:#fff; border:1.5px solid #e2f0e2; border-radius:14px; transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .3s,border-color .3s; position:relative; overflow:hidden; }
+  .feature::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--green-light),var(--green)); transform:scaleX(0); transition:transform .35s ease; }
+  .feature:hover { transform:translateY(-8px); box-shadow:0 16px 40px rgba(45,122,58,.15); border-color:var(--green-light); }
+  .feature:hover::after { transform:scaleX(1); }
+  .feature-icon { font-size:2.2rem; margin-bottom:.8rem; display:block; transition:transform .4s cubic-bezier(.34,1.56,.64,1); }
+  .feature:hover .feature-icon { transform:scale(1.3) rotate(12deg); }
+  .feature-title { font-weight:800; color:var(--text); margin-bottom:.4rem; }
+  .feature-desc { color:var(--text-muted); font-size:.85rem; }
+
+  .search-section { background:#fff; padding:5rem 1.5rem; }
+  .search-box { max-width:500px; margin:0 auto; display:flex; gap:10px; }
+  .search-input { flex:1; padding:13px 18px; border:1.5px solid var(--card-border); border-radius:9px; font-family:'Nunito',sans-serif; font-size:1rem; font-weight:600; color:var(--text); outline:none; transition:border-color .2s,box-shadow .2s; }
+  .search-input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(74,222,128,.15); }
+  .search-result { max-width:500px; margin:1.5rem auto 0; background:var(--bg2); border:1.5px solid var(--card-border); border-radius:12px; padding:1.2rem 1.5rem; display:none; animation:fadeInUp .4s ease; }
+  .search-result.show { display:block; }
+  @keyframes fadeInUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .result-name { font-family:'Orbitron',sans-serif; font-size:1.1rem; color:var(--green); font-weight:700; margin-bottom:.5rem; }
+  .result-info { font-size:.9rem; color:var(--text-muted); line-height:1.8; }
+  .result-info span { color:var(--text); font-weight:700; }
+
+  .recent-section { background:var(--bg2); padding:5rem 1.5rem; }
+  .players-list { max-width:600px; margin:0 auto; display:flex; flex-direction:column; gap:8px; }
+  .player-item { background:#fff; border:1.5px solid var(--card-border); border-radius:10px; padding:.8rem 1.2rem; display:flex; align-items:center; gap:12px; font-size:.9rem; transition:transform .25s,box-shadow .25s,border-color .25s; animation:fadeInUp .4s ease both; }
+  .player-item:hover { transform:translateX(8px); box-shadow:0 4px 20px rgba(45,122,58,.12); border-color:var(--green-light); }
+  .player-avatar { width:36px; height:36px; border-radius:6px; image-rendering:pixelated; transition:transform .3s; }
+  .player-item:hover .player-avatar { transform:scale(1.2) rotate(-6deg); }
+  .player-name { font-weight:800; color:var(--text); }
+  .player-date { color:var(--text-muted); font-size:.8rem; margin-top:2px; }
+
+  .cta-section { background:linear-gradient(135deg,#edfcee,#f5fff5); border-top:1px solid #d4edda; border-bottom:1px solid #d4edda; text-align:center; padding:5rem 1.5rem; position:relative; overflow:hidden; }
+  .cta-section::before { content:''; position:absolute; width:500px; height:500px; background:radial-gradient(circle,rgba(74,222,128,.15),transparent 70%); top:50%; left:50%; transform:translate(-50%,-50%); animation:ctaPulse 4s ease-in-out infinite; pointer-events:none; }
+  @keyframes ctaPulse { 0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.5} 50%{transform:translate(-50%,-50%) scale(1.4);opacity:1} }
+  .cta-section h2 { font-family:'Orbitron',sans-serif; font-size:clamp(1.3rem,3vw,1.9rem); font-weight:900; margin-bottom:.8rem; letter-spacing:1px; position:relative; }
+  .cta-section p { color:var(--text-muted); margin-bottom:2rem; position:relative; }
+  .ip-copy-box { display:inline-flex; align-items:center; gap:1rem; background:#fff; border:1.5px solid #d4edda; border-radius:12px; padding:1rem 1.5rem; margin-bottom:2rem; flex-wrap:wrap; justify-content:center; box-shadow:var(--shadow); position:relative; transition:box-shadow .3s; }
+  .ip-copy-box:hover { box-shadow:0 10px 36px rgba(45,122,58,.2); }
+  .ip-copy-box code { font-family:'Orbitron',sans-serif; color:var(--green); font-size:1.15rem; letter-spacing:2px; }
+  .copy-btn { background:var(--green-btn); color:#fff; font-weight:800; padding:8px 20px; border-radius:8px; border:none; cursor:pointer; font-family:'Nunito',sans-serif; font-size:.9rem; transition:background .2s,transform .15s; }
+  .copy-btn:hover { background:var(--green-btn-hover); transform:scale(1.07); }
+  .copy-btn.copied { background:#15803d; }
+
+  footer { background:#fff; border-top:1px solid #e8f5e9; text-align:center; padding:2rem; color:var(--text-muted); font-size:.88rem; }
+  .footer-logo { font-family:'Orbitron',sans-serif; font-size:1.1rem; color:var(--green); font-weight:900; margin-bottom:.4rem; letter-spacing:3px; }
+
+  .toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(100px); background:var(--green-btn); color:#fff; font-weight:800; padding:12px 28px; border-radius:50px; font-size:.95rem; transition:transform .4s cubic-bezier(.34,1.56,.64,1); z-index:999; pointer-events:none; box-shadow:0 4px 20px rgba(0,0,0,.2); }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
+  .reveal { opacity:0; transform:translateY(28px); transition:opacity .6s ease,transform .6s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+
+  .loading { color:var(--text-muted); font-size:.9rem; text-align:center; }
+  @media(max-width:700px){ .nav-links{display:none} .stat-item{border-right:none;border-bottom:1px solid #e8f5e9;width:50%} }
+</style>
+</head>
+<body>
+
+<div id="preloader">
+  <div class="pre-grid">
+    <div></div><div></div><div></div>
+    <div></div><div></div><div></div>
+    <div></div><div></div><div></div>
+  </div>
+  <div class="pre-text">THORN MC</div>
+</div>
+
+<nav>
+  <a class="logo" href="#">
+    <img src="https://minecraft.wiki/images/Block_of_Emerald_JE4_BE3.png?d5a3c" alt="logo" style="width:32px;height:32px;image-rendering:pixelated;"/>
+    THORN&nbsp;MC
+  </a>
+  <ul class="nav-links">
+    <li><a href="#modes">Rejimlar</a></li>
+    <li><a href="#players">O'yinchilar</a></li>
+    <li><a href="#why">Nima uchun biz?</a></li>
+    <li><a href="#contact">Aloqa</a></li>
+  </ul>
+  <button class="nav-ip" onclick="copyIP()">📋 IP Nusxalash</button>
+</nav>
+
+<div class="hero">
+  <div class="pixel-rain" id="pixel-rain"></div>
+  <div class="pixel-side left">
+    <svg viewBox="0 0 220 700" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+      <rect class="pb" x="0" y="80" width="60" height="60" fill="#86efac" rx="2" style="animation-duration:3s;animation-delay:0s"/>
+      <rect class="pb" x="70" y="50" width="50" height="50" fill="#4ade80" rx="2" style="animation-duration:4.2s;animation-delay:.5s"/>
+      <rect class="pb" x="130" y="110" width="60" height="60" fill="#bbf7d0" rx="2" style="animation-duration:3.6s;animation-delay:1s"/>
+      <rect class="pb" x="10" y="180" width="75" height="75" fill="#86efac" rx="2" style="animation-duration:5s;animation-delay:.3s"/>
+      <rect class="pb" x="100" y="240" width="55" height="55" fill="#4ade80" rx="2" style="animation-duration:3.9s;animation-delay:.8s"/>
+      <rect class="pb" x="25" y="320" width="70" height="70" fill="#bbf7d0" rx="2" style="animation-duration:4.4s;animation-delay:.2s"/>
+      <rect class="pb" x="0" y="410" width="80" height="80" fill="#86efac" rx="2" style="animation-duration:3.3s;animation-delay:1.2s"/>
+      <rect class="pb" x="110" y="390" width="60" height="60" fill="#4ade80" rx="2" style="animation-duration:4.7s;animation-delay:.6s"/>
+      <rect class="pb" x="45" y="500" width="65" height="65" fill="#bbf7d0" rx="2" style="animation-duration:3.8s;animation-delay:.9s"/>
+      <rect class="pb" x="0" y="580" width="90" height="90" fill="#86efac" rx="2" style="animation-duration:4.9s;animation-delay:.4s"/>
+    </svg>
+  </div>
+  <div class="pixel-side right">
+    <svg viewBox="0 0 220 700" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+      <rect class="pb" x="55" y="60" width="60" height="60" fill="#86efac" rx="2" style="animation-duration:4.1s;animation-delay:.7s"/>
+      <rect class="pb" x="125" y="100" width="70" height="70" fill="#4ade80" rx="2" style="animation-duration:3.5s;animation-delay:.2s"/>
+      <rect class="pb" x="10" y="155" width="60" height="60" fill="#bbf7d0" rx="2" style="animation-duration:5s;animation-delay:1.1s"/>
+      <rect class="pb" x="135" y="240" width="75" height="75" fill="#86efac" rx="2" style="animation-duration:3.2s;animation-delay:.5s"/>
+      <rect class="pb" x="25" y="320" width="65" height="65" fill="#4ade80" rx="2" style="animation-duration:4.5s;animation-delay:.9s"/>
+      <rect class="pb" x="105" y="395" width="70" height="70" fill="#bbf7d0" rx="2" style="animation-duration:3.9s;animation-delay:.3s"/>
+      <rect class="pb" x="0" y="475" width="80" height="80" fill="#86efac" rx="2" style="animation-duration:5.2s;animation-delay:.8s"/>
+      <rect class="pb" x="145" y="510" width="60" height="60" fill="#4ade80" rx="2" style="animation-duration:3.4s;animation-delay:1.3s"/>
+      <rect class="pb" x="50" y="595" width="90" height="90" fill="#bbf7d0" rx="2" style="animation-duration:4.6s;animation-delay:.6s"/>
+    </svg>
+  </div>
+
+  <div class="hero-content">
+    <div class="server-logo" onclick="spinLogo(this)">
+      <img src="https://minecraft.wiki/images/Block_of_Emerald_JE4_BE3.png?d5a3c" alt="Emerald Block" style="width:140px;height:140px;image-rendering:pixelated;"/>
+    </div>
+    <h1>THORN&nbsp;&nbsp;MC</h1>
+    <div class="online-badge">
+      <div class="dot"></div>
+      <span id="online-count">...</span> ta o'yinchi online 🎮
+    </div>
+    <p>O'zbekistondagi eng tez va eng yaxshi Minecraft tajribasi.<br>TAS-IX tarmoq, ultra past ping, faol jamiyat!</p>
+    <div class="ip-box">
+      <div class="ip-label">Server IP manzili</div>
+      <div class="ip-address">mc.thornmc.uz</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="copyIP()">📋 IP Nusxalash</button>
+      <a class="btn-secondary" href="#modes">O'yin Rejimlari →</a>
+    </div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat-item reveal"><span class="stat-icon">⚡</span><div><div class="stat-number">38ms</div><div class="stat-label">Ultra Past Ping</div></div></div>
+  <div class="stat-item reveal"><span class="stat-icon">🕐</span><div><div class="stat-number">24/7</div><div class="stat-label">Server Ishlash</div></div></div>
+  <div class="stat-item reveal"><span class="stat-icon">👥</span><div><div class="stat-number" id="registered-count">...</div><div class="stat-label">Ro'yxatdan O'tgan</div></div></div>
+  <div class="stat-item reveal"><span class="stat-icon">🌐</span><div><div class="stat-number">TAS-IX</div><div class="stat-label">Premium Tarmoq</div></div></div>
+  <div class="stat-item reveal"><span class="stat-icon">🏆</span><div><div class="stat-number">#1</div><div class="stat-label">O'zbekistonda</div></div></div>
+</div>
+
+<section id="modes">
+  <div class="container">
+    <h2 class="section-title reveal">⚔️ O'YIN REJIMLARI</h2>
+    <p class="section-sub reveal">Har bir o'yinchi uchun mos rejim — siz tanlab oling!</p>
+    <div class="modes-grid">
+      <div class="mode-card reveal" style="transition-delay:.08s"><span class="mode-icon">🌍</span><div class="mode-name">Survival</div><p class="mode-desc">Klassik Minecraft tajribasi. Do'stlar bilan birgalikda qurish, ovlash va omon qolish!</p><span class="mode-tag">Klassik</span></div>
+      <div class="mode-card reveal" style="transition-delay:.16s"><span class="mode-icon">🔥</span><div class="mode-name">Anarxiya</div><p class="mode-desc">Grieferlar va jangchilar uchun mukammal rejim. Omon qolish uchun strategiya!</p><span class="mode-tag">Hardcore</span></div>
+      <div class="mode-card reveal" style="transition-delay:.24s"><span class="mode-icon">🥊</span><div class="mode-name">Box PvP</div><p class="mode-desc">1v1 janglarda mahoratingizni sinab ko'ring, kuchayib, raqiblarni mag'lub eting!</p><span class="mode-tag">1v1</span></div>
+      <div class="mode-card reveal" style="transition-delay:.32s"><span class="mode-icon">🛏️</span><div class="mode-name">BedWars</div><p class="mode-desc">O'z to'shagingizni himoya qiling! Strategiya va tezkorlik bu yerda muhim.</p><span class="mode-tag">Jamoa</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="players" class="search-section">
+  <div class="container">
+    <h2 class="section-title reveal">🔍 O'YINCHI QIDIRISH</h2>
+    <p class="section-sub reveal">Username bo'yicha o'yinchi ma'lumotlarini toping</p>
+    <div class="search-box reveal">
+      <input type="text" class="search-input" id="search-input" placeholder="Username kiriting..." onkeydown="if(event.key==='Enter')searchPlayer()"/>
+      <button class="btn-primary" onclick="searchPlayer()">Qidirish</button>
+    </div>
+    <div class="search-result" id="search-result"></div>
+  </div>
+</section>
+
+<section class="recent-section">
+  <div class="container">
+    <h2 class="section-title reveal">🆕 SO'NGGI O'YINCHILAR</h2>
+    <p class="section-sub reveal">Bazaga so'nggi ro'yxatdan o'tgan o'yinchilar</p>
+    <div class="players-list" id="players-list"><p class="loading">Yuklanmoqda...</p></div>
+  </div>
+</section>
+
+<section id="why" class="why-bg">
+  <div class="container">
+    <h2 class="section-title reveal">⭐ NIMA UCHUN THORN MC?</h2>
+    <p class="section-sub reveal">Biz O'zbekistondagi eng yaxshi Minecraft tajribasini taklif etamiz</p>
+    <div class="features-grid">
+      <div class="feature reveal" style="transition-delay:.05s"><span class="feature-icon">⚡</span><div class="feature-title">Ultra Tez Ping</div><p class="feature-desc">TAS-IX tarmoq infratuzilmasi bilan 38ms ping va eng silliq o'yin tajribasi</p></div>
+      <div class="feature reveal" style="transition-delay:.1s"><span class="feature-icon">🛡️</span><div class="feature-title">Xavfsiz O'yin</div><p class="feature-desc">Kuchli anti-cheat va himoya tizimlari bilan to'liq xavfsiz o'yin muhiti</p></div>
+      <div class="feature reveal" style="transition-delay:.15s"><span class="feature-icon">🎉</span><div class="feature-title">Faol Jamiyat</div><p class="feature-desc">Muntazam tadbirlar va do'stona jamiyat bilan eng yaxshi Minecraft tajribasi</p></div>
+      <div class="feature reveal" style="transition-delay:.2s"><span class="feature-icon">🔧</span><div class="feature-title">Doimiy Yangilanish</div><p class="feature-desc">Har oyda yangi kontentlar, yangilanishlar va voqealar bilan yangilanib turadi</p></div>
+      <div class="feature reveal" style="transition-delay:.25s"><span class="feature-icon">👥</span><div class="feature-title">Tajribali Xodimlar</div><p class="feature-desc">24/7 onlayn yordam beruvchi va faol moderatorlar jamiyati</p></div>
+      <div class="feature reveal" style="transition-delay:.3s"><span class="feature-icon">🏅</span><div class="feature-title">Reyting Tizimi</div><p class="feature-desc">O'ynang, yuting va reytingda ko'taring. Eng yaxshilar ro'yxatiga kiring!</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="cta-section" id="contact">
+  <div class="container" style="position:relative">
+    <h2 class="reveal">🚀 Sarguzashtga Tayyor Bo'ldingizmi?</h2>
+    <p class="reveal">Hoziroq ulanib, do'stlaringiz bilan O'zbekistondagi eng yaxshi Minecraft serverini boshdan kechiring!</p>
+    <div class="ip-copy-box reveal">
+      <code>mc.thornmc.uz</code>
+      <button class="copy-btn" onclick="copyIP()" id="cta-copy-btn">Nusxalash</button>
+    </div>
+    <br>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1rem" class="reveal">
+      <a href="https://t.me/THORN_Mc" class="btn-primary">💬 Telegram</a>
+      <a href="https://discord.gg/fZ8r3CEU8" class="btn-secondary">🎧 Discord</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">THORN MC</div>
+  <p>© 2025 THORN MC. O'zbekistondagi eng yaxshi Minecraft tajribasi. 🎮</p>
+</footer>
+
+<div class="toast" id="toast">✅ IP manzil nusxalandi!</div>
+
+<script>
+const API = 'http://localhost:3000';
+
+// Sana formatlash — asosiy funksiya
+function formatDate(val) {
+  if (!val) return "Noma'lum";
+  const ms = parseInt(val);
+  if (isNaN(ms) || ms <= 0) return "Noma'lum";
+  const date = new Date(ms);
+  const year = date.getFullYear();
+  if (year < 2000 || year > 2100) return "Noma'lum";
+  const d = String(date.getDate()).padStart(2,'0');
+  const m = String(date.getMonth()+1).padStart(2,'0');
+  const h = String(date.getHours()).padStart(2,'0');
+  const min = String(date.getMinutes()).padStart(2,'0');
+  return `${d}.${m}.${year} ${h}:${min}`;
+}
+
+// Preloader
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('preloader').classList.add('hidden'), 1500);
+});
+
+// Pixel rain
+const colors = ['#86efac','#4ade80','#bbf7d0','#22c55e','#16a34a'];
+const rain = document.getElementById('pixel-rain');
+for (let i = 0; i < 20; i++) {
+  const s = document.createElement('span');
+  const size = Math.random() * 14 + 6;
+  s.style.cssText = `left:${Math.random()*100}%;width:${size}px;height:${size}px;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${Math.random()*9+7}s;animation-delay:${Math.random()*7}s;opacity:.12;border-radius:${Math.random()>.5?'2px':'50%'}`;
+  rain.appendChild(s);
+}
+
+// Logo spin
+function spinLogo(el) {
+  el.style.animation = 'none';
+  el.style.transition = 'transform .65s cubic-bezier(.34,1.56,.64,1)';
+  el.style.transform = 'scale(1.25) rotate(360deg)';
+  setTimeout(() => {
+    el.style.transform = '';
+    el.style.transition = '';
+    el.style.animation = 'heroFloat 4s ease-in-out infinite';
+  }, 700);
+}
+
+// Scroll reveal
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// Animate number
+function animNum(id, target, suffix='') {
+  const el = document.getElementById(id);
+  let cur = 0;
+  const step = Math.max(1, Math.ceil(target/35));
+  const t = setInterval(() => {
+    cur = Math.min(cur+step, target);
+    el.textContent = cur + suffix;
+    if (cur >= target) clearInterval(t);
+  }, 40);
+}
+
+// Stats
+async function loadStats() {
+  try {
+    const res = await fetch(`${API}/api/stats`);
+    const d = await res.json();
+    animNum('online-count', d.online);
+    animNum('registered-count', d.registered, '+');
+  } catch {
+    document.getElementById('online-count').textContent = '—';
+    document.getElementById('registered-count').textContent = '—';
+  }
+}
+
+// Recent players
+async function loadRecentPlayers() {
+  try {
+    const res = await fetch(`${API}/api/players/recent`);
+    const players = await res.json();
+    const list = document.getElementById('players-list');
+    if (!players.length) { list.innerHTML = '<p class="loading">Hali o\'yinchi yo\'q</p>'; return; }
+    list.innerHTML = players.map((p,i) => {
+      const date = formatDate(p.regdate);
+      return `<div class="player-item" style="animation-delay:${i*.07}s">
+        <img class="player-avatar" src="https://mc-heads.net/avatar/${p.username}/36" alt="${p.username}" onerror="this.src='https://minecraft.wiki/images/Block_of_Emerald_JE4_BE3.png?d5a3c'"/>
+        <div><div class="player-name">${p.username}</div><div class="player-date">📅 ${date}</div></div>
+      </div>`;
+    }).join('');
+  } catch {
+    document.getElementById('players-list').innerHTML = '<p class="loading">Ma\'lumot yuklanmadi</p>';
+  }
+}
+
+// Search
+async function searchPlayer() {
+  const username = document.getElementById('search-input').value.trim();
+  if (!username) return;
+  const rd = document.getElementById('search-result');
+  rd.className = 'search-result show';
+  rd.innerHTML = '<p class="loading">🔍 Qidirilmoqda...</p>';
+  try {
+    const res = await fetch(`${API}/api/player/${username}`);
+    const d = await res.json();
+    if (!d.found) { rd.innerHTML = `<p style="color:#e53e3e;font-weight:700">❌ "${username}" topilmadi</p>`; return; }
+    const p = d.player;
+    const reg = formatDate(p.regdate);
+    const last = formatDate(p.lastlogin);
+    rd.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <img src="https://mc-heads.net/avatar/${p.username}/48" style="border-radius:8px;image-rendering:pixelated" onerror="this.style.display='none'"/>
+        <div class="result-name">✅ ${p.username}</div>
+      </div>
+      <div class="result-info">📅 Ro'yxatdan o'tgan: <span>${reg}</span><br>🕐 Oxirgi kirish: <span>${last}</span></div>`;
+  } catch {
+    rd.innerHTML = '<p class="loading">Server bilan ulanishda xatolik</p>';
+  }
+}
+
+// Copy IP
+function copyIP() {
+  navigator.clipboard.writeText('mc.thornmc.uz').then(() => {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+    const btn = document.getElementById('cta-copy-btn');
+    if (btn) { btn.textContent='✅ Nusxalandi!'; btn.classList.add('copied'); setTimeout(()=>{btn.textContent='Nusxalash';btn.classList.remove('copied')},2000); }
+  });
+}
+
+loadStats();
+loadRecentPlayers();
+setInterval(loadStats, 30000);
+</script>
+</body>
+</html>
